@@ -1,4 +1,4 @@
-package handler
+package controller
 
 import (
 	"encoding/json"
@@ -31,13 +31,13 @@ type registerReq struct {
 	Gender int    `json:"gender"`
 	Name   string `json:"name"`
 }
-type UserHanlder struct {
+type UserController struct {
 }
 
 var sessions map[string]*Session = make(map[string]*Session)
 
 // 注册
-func (h *UserHanlder) Login(c *gin.Context) {
+func (h *UserController) Login(c *gin.Context) {
 	go clearSession()
 	var req registerReq
 	nowTime := time.Now().Unix()
