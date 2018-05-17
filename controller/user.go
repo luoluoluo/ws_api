@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +27,7 @@ type WxSession struct {
 	OpenId     string `json:"openid"`
 	SessionKey string `json:"session_key"`
 }
-type registerReq struct {
+type loginReq struct {
 	Code   string `json:"code"`
 	Avatar string `json:"avatar"`
 	Gender int    `json:"gender"`
@@ -36,36 +38,36 @@ type UserController struct {
 
 var sessions map[string]*Session = make(map[string]*Session)
 
-// 注册
+// 登录
 func (h *UserController) Login(c *gin.Context) {
 	go clearSession()
-	var req registerReq
+	var req loginReq
 	nowTime := time.Now().Unix()
 	err := c.BindJSON(&req)
 	if err != nil {
 		glog.Error(err)
-		c.JSON(400, gin.H{})
+		resp(c, 400, nil)
 		return
 	}
 	if req.Code == "" {
-		c.JSON(400, gin.H{})
+		resp(c, 400, nil)
 		return
 	}
 	session, err := wxJscodeToSession(req.Code)
 	if err != nil {
 		glog.Error(err)
-		c.JSON(500, gin.H{})
+		resp(c, 1000, nil)
 		return
 	}
 	if session.OpenId == "" || session.SessionKey == "" {
-		c.JSON(500, gin.H{})
+		resp(c, 1000, nil)
 		return
 	}
 	db := c.MustGet("db").(*library.DB)
 	user, err := db.SelectOne("SELECT * FROM user WHERE openid=?", session.OpenId)
 	if err != nil {
 		glog.Error(err)
-		c.JSON(500, gin.H{})
+		resp(c, 500, nil)
 		return
 	}
 	// 新增用户信息
@@ -81,7 +83,7 @@ func (h *UserController) Login(c *gin.Context) {
 		)
 		if err != nil {
 			glog.Error(err)
-			c.JSON(500, gin.H{})
+			resp(c, 500, nil)
 			return
 		}
 	} else { // 修改用户信息
@@ -95,7 +97,7 @@ func (h *UserController) Login(c *gin.Context) {
 		)
 		if err != nil {
 			glog.Error(err)
-			c.JSON(500, gin.H{})
+			resp(c, 500, nil)
 			return
 		}
 	}
@@ -104,7 +106,7 @@ func (h *UserController) Login(c *gin.Context) {
 
 	if err != nil || len(user) == 0 {
 		glog.Error(err)
-		c.JSON(500, gin.H{})
+		resp(c, 500, nil)
 		return
 	}
 
@@ -122,13 +124,22 @@ func (h *UserController) Login(c *gin.Context) {
 
 	setSession(sessionid, res)
 
-	c.JSON(200, res)
+	resp(c, 200, res)
 	return
 }
 
 // js code 换取 session
 func wxJscodeToSession(code string) (*WxSession, error) {
-	resp, err := http.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + config.Wx["id"] + "&secret=" + config.Wx["secret"] + "&js_code=" + code + "&grant_type=authorization_code")
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	//http cookie接口
+	cookieJar, _ := cookiejar.New(nil)
+	h := &http.Client{
+		Jar:       cookieJar,
+		Transport: tr,
+	}
+	resp, err := h.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + config.Wx["id"] + "&secret=" + config.Wx["secret"] + "&js_code=" + code + "&grant_type=authorization_code")
 
 	if err != nil {
 		glog.Error(err)
