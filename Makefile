@@ -1,6 +1,7 @@
 IMAGE_NAME=ws_api
 # 编译
 install:
+	glide update
 	go build --ldflags '-linkmode external -extldflags "-static"' -o ./main
 	docker build -t ${IMAGE_NAME} .
 	rm ./main
