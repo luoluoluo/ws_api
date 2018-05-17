@@ -1,0 +1,44 @@
+hash: 29ced14651a4c690c6961c99a9354127a1ce336f9944099c9d07ff9bd85c55d5
+updated: 2018-05-15T15:43:00.20803665+08:00
+imports:
+- name: github.com/gin-contrib/sse
+  version: 22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae
+- name: github.com/gin-gonic/gin
+  version: bf7803815b0baa22ff7a10457932882dfbf09925
+  subpackages:
+  - binding
+  - json
+  - render
+- name: github.com/go-sql-driver/mysql
+  version: 3287d94d4c6a48a63e16fffaabf27ab20203af2a
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+- name: github.com/golang/protobuf
+  version: 927b65914520a8b7d44f5c9057611cfec6b2e2d0
+  subpackages:
+  - proto
+- name: github.com/json-iterator/go
+  version: 2ddf6d758266fcb080a4f9e054b9f292c85e6798
+- name: github.com/mattn/go-isatty
+  version: 6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c
+- name: github.com/modern-go/concurrent
+  version: bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94
+- name: github.com/modern-go/reflect2
+  version: 58118c1ea9161250907268a484af4dd6ed314280
+- name: github.com/ugorji/go
+  version: f3cacc17c85ecb7f1b6a9e373ee85d1480919868
+  subpackages:
+  - codec
+- name: golang.org/x/sys
+  version: d0faeb539838e250bd0a9db4182d48d4a1915181
+  subpackages:
+  - unix
+- name: google.golang.org/appengine
+  version: 962cbd1200af94a5a35ba8d512e9f91271b4d01a
+  subpackages:
+  - cloudsql
+- name: gopkg.in/go-playground/validator.v8
+  version: 5f1438d3fca68893a817e4a66806cea46a9e4ebf
+- name: gopkg.in/yaml.v2
+  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+testImports: []
