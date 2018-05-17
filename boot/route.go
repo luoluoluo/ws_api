@@ -5,16 +5,18 @@ import (
 	"github.com/luoluoluo/ws_api/handler"
 	"github.com/luoluoluo/ws_api/util"
 )
+var userHanlder handler.UserHanlder = &handler.UserHanlder{}
 
 func route(r *gin.Engine) {
-	userHanlder := &handler.UserHanlder{}
 	r.POST("login", userHanlder.Login)
+}
 
-	r.GET("/ping", func(c *gin.Context) {
-		db := c.MustGet("db").(*util.DB)
-		num, _ := db.Exec("select count(*) from user")
-		c.JSON(200, gin.H{
-			"message": num,
-		})
-	})
+func func checkLogin()() gin.HandlerFunc {
+    return func(c *gin.Context) {
+		sessionid := c.GetHeader("sessionid")
+        session := userHanlder.GetSession(sessionid)
+        c.Set("request", "clinet_request")
+        c.Next()
+        fmt.Println("before middleware")
+    }
 }

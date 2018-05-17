@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"os"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
+	"github.com/luoluoluo/ws_api/config"
 	"github.com/luoluoluo/ws_api/util"
 )
 
@@ -129,9 +128,7 @@ func (h *UserHanlder) Login(c *gin.Context) {
 
 // js code 换取 session
 func wxJscodeToSession(code string) (*WxSession, error) {
-	wxId := os.Getenv("WX_ID")
-	wxSecret := os.Getenv("WX_SECRET")
-	resp, err := http.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + wxId + "&secret=" + wxSecret + "&js_code=" + code + "&grant_type=authorization_code")
+	resp, err := http.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + config.Wx["id"] + "&secret=" + config.Wx["secret"] + "&js_code=" + code + "&grant_type=authorization_code")
 
 	if err != nil {
 		glog.Error(err)
@@ -172,7 +169,7 @@ func setSession(sessionid string, session *Session) {
 func clearSession() {
 	nowTime := time.Now().Unix()
 	for sessionid, session := range sessions {
-		if session.Time < nowTime-6400 {
+		if session.Time < nowTime-7200 {
 			delete(sessions, sessionid)
 		}
 	}
