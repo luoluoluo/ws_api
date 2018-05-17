@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"github.com/luoluoluo/ws_api/config"
-	"github.com/luoluoluo/ws_api/util"
+	"github.com/luoluoluo/ws_api/library"
 )
 
 type Session struct {
@@ -61,7 +61,7 @@ func (h *UserHanlder) Login(c *gin.Context) {
 		c.JSON(500, gin.H{})
 		return
 	}
-	db := c.MustGet("db").(*util.DB)
+	db := c.MustGet("db").(*library.DB)
 	user, err := db.SelectOne("SELECT * FROM user WHERE openid=?", session.OpenId)
 	if err != nil {
 		glog.Error(err)
@@ -108,14 +108,14 @@ func (h *UserHanlder) Login(c *gin.Context) {
 		return
 	}
 
-	sessionid := util.Md5(session.SessionKey)
+	sessionid := library.Md5(session.SessionKey)
 
 	res := &Session{
-		util.ParseInt(user["id"]),
+		library.ParseInt(user["id"]),
 		user["openId"],
 		user["name"],
 		user["avatar"],
-		util.ParseInt(user["gender"]),
+		library.ParseInt(user["gender"]),
 		sessionid,
 		nowTime,
 	}

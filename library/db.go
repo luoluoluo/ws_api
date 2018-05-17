@@ -1,4 +1,4 @@
-package util
+package library
 
 import (
 	"database/sql"
