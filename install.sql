@@ -22,6 +22,5 @@ CREATE TABLE `task` (
   `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0 隐藏， 1 正常',
   `create_time` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  KEY `create_time` (`create_time`)
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT '任务表';

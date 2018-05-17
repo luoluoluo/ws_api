@@ -39,6 +39,7 @@ var sessions map[string]*Session = make(map[string]*Session)
 
 // 注册
 func (h *UserHanlder) Login(c *gin.Context) {
+	go clearSession()
 	var req registerReq
 	nowTime := time.Now().Unix()
 	err := c.BindJSON(&req)
