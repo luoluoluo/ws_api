@@ -1,32 +1,14 @@
 package controller
 
 import (
-	"crypto/tls"
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
-	"net/http/cookiejar"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
-	"github.com/luoluoluo/ws_api/config"
 	"github.com/luoluoluo/ws_api/library"
+	"github.com/luoluoluo/ws_api/model"
 )
 
-type Session struct {
-	Id        int    `json:"id"`
-	OpenId    string `json:"openid"`
-	Name      string `json:"name"`
-	Avatar    string `json:"avatar"`
-	Gender    int    `json:"gender"`
-	SessionId string `json:"sessionid"`
-	Time      int64  `json:"time"`
-}
-type WxSession struct {
-	OpenId     string `json:"openid"`
-	SessionKey string `json:"session_key"`
-}
 type loginReq struct {
 	Code   string `json:"code"`
 	Avatar string `json:"avatar"`
@@ -34,40 +16,38 @@ type loginReq struct {
 	Name   string `json:"name"`
 }
 type UserController struct {
+	Controller
 }
 
-var sessions map[string]*Session = make(map[string]*Session)
-
 // 登录
-func (h *UserController) Login(c *gin.Context) {
-	go clearSession()
+func (u *UserController) Login(c *gin.Context) {
 	var req loginReq
 	nowTime := time.Now().Unix()
 	err := c.BindJSON(&req)
 	if err != nil {
 		glog.Error(err)
-		resp(c, 400, nil)
+		u.resp(c, 400, nil)
 		return
 	}
 	if req.Code == "" {
-		resp(c, 400, nil)
+		u.resp(c, 400, nil)
 		return
 	}
-	session, err := wxJscodeToSession(req.Code)
+	session, err := library.WxJscodeToSession(req.Code)
 	if err != nil {
 		glog.Error(err)
-		resp(c, 1000, nil)
+		u.resp(c, 1000, nil)
 		return
 	}
 	if session.OpenId == "" || session.SessionKey == "" {
-		resp(c, 1000, nil)
+		u.resp(c, 1000, nil)
 		return
 	}
 	db := c.MustGet("db").(*library.DB)
 	user, err := db.SelectOne("SELECT * FROM user WHERE openid=?", session.OpenId)
 	if err != nil {
 		glog.Error(err)
-		resp(c, 500, nil)
+		u.resp(c, 500, nil)
 		return
 	}
 	// 新增用户信息
@@ -83,7 +63,7 @@ func (h *UserController) Login(c *gin.Context) {
 		)
 		if err != nil {
 			glog.Error(err)
-			resp(c, 500, nil)
+			u.resp(c, 500, nil)
 			return
 		}
 	} else { // 修改用户信息
@@ -97,7 +77,7 @@ func (h *UserController) Login(c *gin.Context) {
 		)
 		if err != nil {
 			glog.Error(err)
-			resp(c, 500, nil)
+			u.resp(c, 500, nil)
 			return
 		}
 	}
@@ -106,13 +86,13 @@ func (h *UserController) Login(c *gin.Context) {
 
 	if err != nil || len(user) == 0 {
 		glog.Error(err)
-		resp(c, 500, nil)
+		u.resp(c, 500, nil)
 		return
 	}
 
 	sessionid := library.Md5(session.SessionKey)
 
-	res := &Session{
+	res := &model.Session{
 		library.ParseInt(user["id"]),
 		user["openId"],
 		user["name"],
@@ -121,67 +101,9 @@ func (h *UserController) Login(c *gin.Context) {
 		sessionid,
 		nowTime,
 	}
+	s := &model.Session{}
+	s.Set(sessionid, res)
 
-	setSession(sessionid, res)
-
-	resp(c, 200, res)
+	u.resp(c, 200, res)
 	return
-}
-
-// js code 换取 session
-func wxJscodeToSession(code string) (*WxSession, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	//http cookie接口
-	cookieJar, _ := cookiejar.New(nil)
-	h := &http.Client{
-		Jar:       cookieJar,
-		Transport: tr,
-	}
-	resp, err := h.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + config.Wx["id"] + "&secret=" + config.Wx["secret"] + "&js_code=" + code + "&grant_type=authorization_code")
-
-	if err != nil {
-		glog.Error(err)
-		return &WxSession{}, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	glog.Infoln("wxresp:" + string(body))
-	if err != nil {
-		glog.Error(err)
-		return &WxSession{}, err
-	}
-	wxSession := &WxSession{}
-	json.Unmarshal(body, wxSession)
-	if wxSession.OpenId == "" || wxSession.SessionKey == "" {
-		glog.Error("wsres:" + string(body))
-		return &WxSession{}, err
-	}
-	return wxSession, nil
-}
-
-// 获取session
-func GetSession(sessionid string) *Session {
-	session, exist := sessions[sessionid]
-	if exist {
-		return session
-	}
-	return &Session{}
-}
-
-// 设置session
-func setSession(sessionid string, session *Session) {
-	sessions[sessionid] = session
-}
-
-// 清除过期session
-func clearSession() {
-	nowTime := time.Now().Unix()
-	for sessionid, session := range sessions {
-		if session.Time < nowTime-7200 {
-			delete(sessions, sessionid)
-		}
-	}
 }

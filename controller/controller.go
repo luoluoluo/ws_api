@@ -5,8 +5,11 @@ import (
 	"github.com/luoluoluo/ws_api/config"
 )
 
-func resp(c *gin.Context, code int, data interface{}) {
-	c.JSON(code, gin.H{
+type Controller struct {
+}
+
+func (controller *Controller) resp(context *gin.Context, code int, data interface{}) {
+	context.JSON(code, gin.H{
 		"code": code,
 		"text": config.StatusText(code),
 		"data": data,
