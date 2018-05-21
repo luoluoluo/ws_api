@@ -4,11 +4,13 @@ import (
 	"database/sql"
 )
 
+// DB db struct
 type DB struct {
 	*sql.DB
 	driver string
 }
 
+// NewDB new
 func NewDB(driver, dsn string) (*DB, error) {
 	db, err := sql.Open(driver, dsn)
 	if err != nil {
@@ -18,9 +20,9 @@ func NewDB(driver, dsn string) (*DB, error) {
 	return &DB{db, driver}, err
 }
 
-// insert
+// Insert insert
 func (db *DB) Insert(sqlstr string, args ...interface{}) (int64, error) {
-	stmt, err := db.DB.Prepare(sqlstr)
+	stmt, err := db.Prepare(sqlstr)
 	if err != nil {
 		return 0, err
 	}
@@ -35,9 +37,9 @@ func (db *DB) Insert(sqlstr string, args ...interface{}) (int64, error) {
 	return id, nil
 }
 
-// update/delete
+// Exec update/delete
 func (db *DB) Exec(sqlstr string, args ...interface{}) (int64, error) {
-	stmt, err := db.DB.Prepare(sqlstr)
+	stmt, err := db.Prepare(sqlstr)
 	if err != nil {
 		return 0, err
 	}
@@ -50,7 +52,7 @@ func (db *DB) Exec(sqlstr string, args ...interface{}) (int64, error) {
 	return res.RowsAffected()
 }
 
-// select one
+// SelectOne select one
 func (db *DB) SelectOne(sqlstr string, args ...interface{}) (map[string]string, error) {
 	res := make(map[string]string)
 	rows, err := db.Select(sqlstr, args...)
@@ -63,15 +65,11 @@ func (db *DB) SelectOne(sqlstr string, args ...interface{}) (map[string]string, 
 	return res, nil
 }
 
+// Select 查询
 func (db *DB) Select(sqlstr string, args ...interface{}) ([]map[string]string, error) {
 	res := make([]map[string]string, 0)
-	stmt, err := db.DB.Prepare(sqlstr)
-	if err != nil {
-		return res, err
-	}
-	defer stmt.Close()
 
-	rows, err := stmt.Query(args...)
+	rows, err := db.Query(sqlstr, args...)
 	if err != nil {
 		return res, err
 	}
@@ -100,4 +98,19 @@ func (db *DB) Select(sqlstr string, args ...interface{}) ([]map[string]string, e
 		res = append(res, vmap)
 	}
 	return res, nil
+}
+
+// Query query
+func (db *DB) Query(sqlstr string, args ...interface{}) (*sql.Rows, error) {
+	stmt, err := db.Prepare(sqlstr)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(args...)
+	if err != nil {
+		return nil, err
+	}
+	return rows, nil
 }

@@ -7,6 +7,7 @@ var statusText = map[int]string{
 	1000: "微信信息获取失败",
 }
 
+// StatusText statut text
 func StatusText(code int) string {
 	text := http.StatusText(code)
 	if text != "" {

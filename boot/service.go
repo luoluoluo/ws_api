@@ -2,19 +2,27 @@ package boot
 
 import (
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/luoluoluo/ws_api/config"
 	"github.com/luoluoluo/ws_api/library"
 )
 
 func service(c *gin.Context) {
 	c.Set("db", getDb())
+	c.Set("aes", getAes())
 }
 
-func getDb() *library.DB {
-	db, err := library.NewDB("mysql", config.Db["user"]+":"+config.Db["password"]+"@tcp("+config.Db["host"]+":"+config.Db["port"]+")/"+config.Db["dbname"])
+func getDb() *sqlx.DB {
+	db, err := sqlx.Connect("mysql", config.DB["user"]+":"+config.DB["password"]+"@tcp("+config.DB["host"]+":"+config.DB["port"]+")/"+config.DB["dbname"])
 	if err != nil {
 		panic(err)
 	}
 	return db
+}
+
+func getAes() *library.AES {
+	aes := &library.AES{
+		Key: []byte(config.App["key"]),
+	}
+	return aes
 }

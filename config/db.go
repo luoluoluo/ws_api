@@ -2,7 +2,8 @@ package config
 
 import "os"
 
-var Db = map[string]string{
+// Db config db
+var DB = map[string]string{
 	"user":     os.Getenv("DB_USER"),
 	"password": os.Getenv("DB_PASSWORD"),
 	"dbname":   os.Getenv("DB_NAME"),

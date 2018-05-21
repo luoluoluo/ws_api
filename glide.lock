@@ -1,5 +1,5 @@
 hash: 29ced14651a4c690c6961c99a9354127a1ce336f9944099c9d07ff9bd85c55d5
-updated: 2018-05-17T18:48:58.620534825+08:00
+updated: 2018-05-22T00:10:06.977853534+08:00
 imports:
 - name: github.com/gin-contrib/sse
   version: 22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae
@@ -10,13 +10,17 @@ imports:
   - json
   - render
 - name: github.com/go-sql-driver/mysql
-  version: 3287d94d4c6a48a63e16fffaabf27ab20203af2a
+  version: d03e4c28477ccf584ef564f3957b42550d5785f1
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
   version: 927b65914520a8b7d44f5c9057611cfec6b2e2d0
   subpackages:
   - proto
+- name: github.com/jmoiron/sqlx
+  version: 2aeb6a910c2b94f2d5eb53d9895d80e27264ec41
+  subpackages:
+  - reflectx
 - name: github.com/json-iterator/go
   version: 2ddf6d758266fcb080a4f9e054b9f292c85e6798
 - name: github.com/mattn/go-isatty
