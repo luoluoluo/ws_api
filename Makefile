@@ -7,6 +7,7 @@ install:
 	docker save ${IMAGE_NAME} > ./dist/${IMAGE_NAME}
 	cp ./Makefile ./dist/Makefile
 	cp ./env.prod ./dist/env.prod
+	./rsync.sh
 # 开发环境
 rundev:
 	docker run  -p 8000:8000 --env-file ./env.dev --network=host ${IMAGE_NAME}
