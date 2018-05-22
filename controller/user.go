@@ -3,6 +3,8 @@ package controller
 import (
 	"time"
 
+	"github.com/luoluoluo/ws_api/config"
+	"github.com/luoluoluo/ws_api/library"
 	"github.com/luoluoluo/ws_api/model"
 
 	"github.com/gin-gonic/gin"
@@ -35,8 +37,34 @@ func (u *UserController) Login(c *gin.Context) {
 		u.resp(c, 400, nil)
 		return
 	}
-	userModel := &model.User{}
-	user, err := userModel.Insert(req.Code, req.Avatar, req.Name, req.Gender)
+	wx := &library.WX{
+		ID:     config.WX["id"],
+		Secret: config.WX["secret"],
+	}
+	wxSession, err := wx.JSCodeToSession(req.Code)
+	if err != nil {
+		u.resp(c, 500, nil)
+		return
+	}
+	user := &model.User{
+		OpenID:     wxSession.OpenID,
+		Name:       req.Name,
+		Avatar:     req.Avatar,
+		Gender:     req.Gender,
+		SessionKey: wxSession.SessionKey,
+	}
+	user, err = user.Insert()
+	if err != nil {
+		glog.Error(err)
+		u.resp(c, 500, nil)
+		return
+	}
+	token := &model.Token{
+		OpenID:     user.OpenID,
+		SessionKey: wxSession.SessionKey,
+		ExpireTime: nowTime + 7200,
+	}
+	tokenStr, err := token.Encrypt()
 	if err != nil {
 		glog.Error(err)
 		u.resp(c, 500, nil)
@@ -49,6 +77,7 @@ func (u *UserController) Login(c *gin.Context) {
 		"avatar": user.Avatar,
 		"gender": user.Gender,
 		"time":   nowTime,
+		"token":  tokenStr,
 	})
 	return
 }

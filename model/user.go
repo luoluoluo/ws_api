@@ -4,38 +4,27 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/luoluoluo/ws_api/config"
 	"github.com/luoluoluo/ws_api/global"
-	"github.com/luoluoluo/ws_api/library"
 )
 
 // User user model
 type User struct {
-	ID          int    `json:"id" db:"id"`
-	OpenID      string `json:"openid" db:"openid"`
-	Name        string `json:"name" db:"name"`
-	Avatar      string `json:"avatar" db:"avatar"`
-	Gender      int    `json:"gender" db:"gender"`
-	SessionKey  string `json:"session_key" db:"session_key"`
-	AccessToken string `json:"access_token" db:"access_token"`
-	UpdateTime  int    `json:"update_time" db:"update_time"`
-	CreateTime  int    `json:"create_time" db:"create_time"`
+	ID         int    `json:"id" db:"id"`
+	OpenID     string `json:"openid" db:"openid"`
+	Name       string `json:"name" db:"name"`
+	Avatar     string `json:"avatar" db:"avatar"`
+	Gender     int    `json:"gender" db:"gender"`
+	SessionKey string `json:"session_key" db:"session_key"`
+	UpdateTime int    `json:"update_time" db:"update_time"`
+	CreateTime int    `json:"create_time" db:"create_time"`
 }
 
 // Insert 新增用户
-func (u *User) Insert(code string, avatar string, name string, gender int) (*User, error) {
+func (u *User) Insert() (*User, error) {
 	nowTime := time.Now().Unix()
-	wx := &library.WX{
-		ID:     config.WX["id"],
-		Secret: config.WX["secret"],
-	}
-	wxSession, err := wx.JSCodeToSession(code)
-	if err != nil {
-		glog.Error(err)
-		return nil, err
-	}
+
 	var count int
-	err = global.DB.Get(&count, "SELECT count(*) FROM user WHERE openid=?", wxSession.OpenID)
+	err := global.DB.Get(&count, "SELECT count(*) FROM user WHERE openid=?", u.OpenID)
 	if err != nil {
 		glog.Error(err)
 		return nil, err
@@ -45,11 +34,11 @@ func (u *User) Insert(code string, avatar string, name string, gender int) (*Use
 		_, err := global.DB.Exec(
 			`INSERT INTO user(openid,name,avatar,gender,session_key, update_time,create_time) 
 			VALUES(?,?,?,?,?,?,?)`,
-			wxSession.OpenID,
-			name,
-			avatar,
-			gender,
-			wxSession.SessionKey,
+			u.OpenID,
+			u.Name,
+			u.Avatar,
+			u.Gender,
+			u.SessionKey,
 			nowTime,
 			nowTime,
 		)
@@ -60,24 +49,23 @@ func (u *User) Insert(code string, avatar string, name string, gender int) (*Use
 	} else { // 修改用户信息
 		_, err := global.DB.Exec(
 			"UPDATE user SET name=?,avatar=?,gender=?,session_key=?,update_time=? WHERE openid=?",
-			name,
-			avatar,
-			gender,
-			wxSession.SessionKey,
+			u.Name,
+			u.Avatar,
+			u.Gender,
+			u.SessionKey,
 			nowTime,
-			wxSession.OpenID,
+			u.OpenID,
 		)
 		if err != nil {
 			glog.Error(err)
 			return nil, err
 		}
 	}
-	return u.GetByOpenID(wxSession.OpenID)
+	return u.GetByOpenID()
 }
 
 // GetByOpenID 根据openid获取用户信息
-func (u *User) GetByOpenID(openID string) (*User, error) {
-	user := &User{}
-	err := global.DB.Get(user, "SELECT * FROM user WHERE openid=?", openID)
-	return user, err
+func (u *User) GetByOpenID() (*User, error) {
+	err := global.DB.Get(u, "SELECT * FROM user WHERE openid=?", u.OpenID)
+	return u, err
 }
