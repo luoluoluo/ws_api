@@ -28,11 +28,12 @@ CREATE TABLE `task` (
 
 CREATE TABLE `comment` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `task_id` INT(11) NOT NULL,
   `user_id` INT(11) NOT NULL,
-  `at_user_id` INT(11) COMMENT 'at的用户id',
   `text` VARCHAR(200) NOT NULL DEFAULT '' COMMENT '文字内容',
   `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0 待审， 1 正常， 2 删除',
   `create_time` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
+  KEY `user_id` (`user_id`),
+  KEY `task_id` (`task_id`)
 ) ENGINE=InnoDB COMMENT '评论表';

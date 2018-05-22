@@ -8,9 +8,11 @@ import (
 
 var userController = &controller.UserController{}
 var taskController = &controller.TaskController{}
+var commentController = &controller.CommentController{}
 
 func route(r *gin.Engine) {
 	r.POST("login", userController.Login)
-	r.GET("task", middleware.Auth(), taskController.List)
-	r.GET("task/{id}", middleware.Auth(), taskController.Info)
+	r.GET("timeline", middleware.Auth(), taskController.Timeline)
+	r.POST("task", middleware.Auth(), taskController.Add)
+	r.POST("comment", middleware.Auth(), commentController.Add)
 }

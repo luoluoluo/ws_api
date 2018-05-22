@@ -24,17 +24,17 @@ type UserController struct {
 }
 
 // Login 登录
-func (u *UserController) Login(c *gin.Context) {
+func (uc *UserController) Login(c *gin.Context) {
 	var req loginReq
 	nowTime := time.Now().Unix()
 	err := c.BindJSON(&req)
 	if err != nil {
 		glog.Error(err)
-		u.resp(c, 400, nil)
+		uc.resp(c, 400, nil)
 		return
 	}
 	if req.Code == "" {
-		u.resp(c, 400, nil)
+		uc.resp(c, 400, nil)
 		return
 	}
 	wx := &library.WX{
@@ -43,7 +43,7 @@ func (u *UserController) Login(c *gin.Context) {
 	}
 	wxSession, err := wx.JSCodeToSession(req.Code)
 	if err != nil {
-		u.resp(c, 500, nil)
+		uc.resp(c, 500, nil)
 		return
 	}
 	user := &model.User{
@@ -56,7 +56,7 @@ func (u *UserController) Login(c *gin.Context) {
 	user, err = user.Insert()
 	if err != nil {
 		glog.Error(err)
-		u.resp(c, 500, nil)
+		uc.resp(c, 500, nil)
 		return
 	}
 	token := &model.Token{
@@ -67,10 +67,10 @@ func (u *UserController) Login(c *gin.Context) {
 	tokenStr, err := token.Encrypt()
 	if err != nil {
 		glog.Error(err)
-		u.resp(c, 500, nil)
+		uc.resp(c, 500, nil)
 		return
 	}
-	u.resp(c, 200, gin.H{
+	uc.resp(c, 200, gin.H{
 		"id":     user.ID,
 		"openid": user.OpenID,
 		"name":   user.Name,
