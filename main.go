@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/luoluoluo/ws_api/boot"
+	_ "github.com/luoluoluo/ws_api/global"
 )
 
 func main() {

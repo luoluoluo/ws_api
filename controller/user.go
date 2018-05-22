@@ -3,7 +3,6 @@ package controller
 import (
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/luoluoluo/ws_api/model"
 
 	"github.com/gin-gonic/gin"
@@ -36,9 +35,8 @@ func (u *UserController) Login(c *gin.Context) {
 		u.resp(c, 400, nil)
 		return
 	}
-	db := c.MustGet("db").(*sqlx.DB)
 	userModel := &model.User{}
-	user, err := userModel.Insert(db, req.Code, req.Avatar, req.Name, req.Gender)
+	user, err := userModel.Insert(req.Code, req.Avatar, req.Name, req.Gender)
 	if err != nil {
 		glog.Error(err)
 		u.resp(c, 500, nil)

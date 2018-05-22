@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/jmoiron/sqlx"
 	"github.com/luoluoluo/ws_api/config"
+	"github.com/luoluoluo/ws_api/global"
 	"github.com/luoluoluo/ws_api/library"
 )
 
@@ -23,7 +23,7 @@ type User struct {
 }
 
 // Insert 新增用户
-func (u *User) Insert(db *sqlx.DB, code string, avatar string, name string, gender int) (*User, error) {
+func (u *User) Insert(code string, avatar string, name string, gender int) (*User, error) {
 	nowTime := time.Now().Unix()
 	wx := &library.WX{
 		ID:     config.WX["id"],
@@ -35,14 +35,14 @@ func (u *User) Insert(db *sqlx.DB, code string, avatar string, name string, gend
 		return nil, err
 	}
 	var count int
-	err = db.Get(&count, "SELECT count(*) FROM user WHERE openid=?", wxSession.OpenID)
+	err = global.DB.Get(&count, "SELECT count(*) FROM user WHERE openid=?", wxSession.OpenID)
 	if err != nil {
 		glog.Error(err)
 		return nil, err
 	}
 	// 新增用户信息
 	if count == 0 {
-		_, err := db.Exec(
+		_, err := global.DB.Exec(
 			`INSERT INTO user(openid,name,avatar,gender,session_key, update_time,create_time) 
 			VALUES(?,?,?,?,?,?,?)`,
 			wxSession.OpenID,
@@ -58,7 +58,7 @@ func (u *User) Insert(db *sqlx.DB, code string, avatar string, name string, gend
 			return nil, err
 		}
 	} else { // 修改用户信息
-		_, err := db.Exec(
+		_, err := global.DB.Exec(
 			"UPDATE user SET name=?,avatar=?,gender=?,session_key=?,update_time=? WHERE openid=?",
 			name,
 			avatar,
@@ -72,12 +72,12 @@ func (u *User) Insert(db *sqlx.DB, code string, avatar string, name string, gend
 			return nil, err
 		}
 	}
-	return u.GetByOpenID(db, wxSession.OpenID)
+	return u.GetByOpenID(wxSession.OpenID)
 }
 
 // GetByOpenID 根据openid获取用户信息
-func (u *User) GetByOpenID(db *sqlx.DB, openID string) (*User, error) {
+func (u *User) GetByOpenID(openID string) (*User, error) {
 	user := &User{}
-	err := db.Get(user, "SELECT * FROM user WHERE openid=?", openID)
+	err := global.DB.Get(user, "SELECT * FROM user WHERE openid=?", openID)
 	return user, err
 }

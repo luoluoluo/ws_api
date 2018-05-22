@@ -4,5 +4,5 @@ import "os"
 
 // App config app
 var App = map[string]string{
-	"key": os.Getenv("key"),
+	"key": os.Getenv("APP_KEY"),
 }
