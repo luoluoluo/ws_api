@@ -23,7 +23,7 @@ type Task struct {
 
 // TaskPaginator 分页
 type TaskPaginator struct {
-	Tasks   []Task `json:"taks"`
+	Items   []Task `json:"items"`
 	HasMore bool   `json:"has_more"`
 }
 
@@ -45,7 +45,7 @@ func (t *Task) Tasks(lastID int, size int) (*TaskPaginator, error) {
 
 	if count == 0 {
 		return &TaskPaginator{
-			Tasks:   tasks,
+			Items:   tasks,
 			HasMore: hasMore,
 		}, nil
 	}
@@ -81,7 +81,7 @@ func (t *Task) Tasks(lastID int, size int) (*TaskPaginator, error) {
 		}
 	}
 	return &TaskPaginator{
-		Tasks:   tasks,
+		Items:   tasks,
 		HasMore: hasMore,
 	}, nil
 }
