@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"github.com/luoluoluo/ws_api/model"
@@ -11,25 +13,16 @@ type TaskController struct {
 	Controller
 }
 
-type timelineReq struct {
-	// LastID 最后一条记录的id
-	LastID int `json:"last_id"`
-	Size   int `json:"size"`
-}
-
 type addTaskReq struct {
 	Text string `json:"text"`
 }
 
 // Timeline 时间线
 func (tc *TaskController) Timeline(c *gin.Context) {
-	req := &timelineReq{}
-	c.BindJSON(req)
-	if req.Size == 0 {
-		req.Size = 10
-	}
+	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
+	lastID, _ := strconv.Atoi(c.DefaultQuery("last_id", "0"))
 	task := &model.Task{}
-	paginator, err := task.Tasks(req.LastID, req.Size)
+	paginator, err := task.Tasks(lastID, size)
 	if err != nil {
 		glog.Error(err)
 		tc.resp(c, 500, gin.H{})
