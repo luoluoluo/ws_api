@@ -18,7 +18,7 @@ type Task struct {
 	Images     string    `json:"images" db:"images"`
 	Status     int       `json:"status" db:"status"`
 	CreateTime int       `json:"create_time" db:"create_time"`
-	Comments   []Comment `json:"comment"`
+	Comments   []Comment `json:"comments"`
 }
 
 // TaskPaginator 分页
