@@ -6,7 +6,7 @@ import (
 	"github.com/luoluoluo/ws_api/model"
 )
 
-// CommentController task 控制器
+// CommentController comment控制器
 type CommentController struct {
 	Controller
 }
@@ -16,7 +16,7 @@ type addCommentReq struct {
 	TaskID int    `json:"task_id"`
 }
 
-// Add 新增task
+// Add 新增评论
 func (cc *CommentController) Add(c *gin.Context) {
 	req := &addCommentReq{}
 	c.BindJSON(req)
