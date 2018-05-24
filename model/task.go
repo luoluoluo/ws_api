@@ -61,7 +61,7 @@ func (t *Task) Tasks(mode int, userID int, lastID int, size int) (*TaskPaginator
 	}
 
 	if lastID != 0 {
-		taskCountSQL += " AND t.id < " + strconv.Itoa(lastID)
+		taskCountSQL += " AND t.id < " + strconv.Itoa(lastID) + " GROUP BY t.id"
 	}
 
 	err := global.DB.Get(&count, taskCountSQL)
@@ -83,7 +83,7 @@ func (t *Task) Tasks(mode int, userID int, lastID int, size int) (*TaskPaginator
 	if lastID != 0 {
 		taskSQL += " AND t.id < " + strconv.Itoa(lastID)
 	}
-	taskSQL += " ORDER BY t.id DESC LIMIT " + strconv.Itoa(size)
+	taskSQL += " GROUP BY t.id ORDER BY t.id DESC LIMIT " + strconv.Itoa(size)
 
 	err = global.DB.Select(&tasks, taskSQL)
 
