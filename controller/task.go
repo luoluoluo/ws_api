@@ -21,8 +21,10 @@ type addTaskReq struct {
 func (tc *TaskController) Timeline(c *gin.Context) {
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
 	lastID, _ := strconv.Atoi(c.DefaultQuery("last_id", "0"))
+	mode, _ := strconv.Atoi(c.DefaultQuery("mode", "0"))
+	user := c.MustGet("user").(*model.User)
 	task := &model.Task{}
-	paginator, err := task.Tasks(lastID, size)
+	paginator, err := task.Tasks(mode, user.ID, lastID, size)
 	if err != nil {
 		glog.Error(err)
 		tc.resp(c, 500, gin.H{})

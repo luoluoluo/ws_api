@@ -14,4 +14,4 @@ rundev:
 # 正式环境
 run:
 	docker load < ./${IMAGE_NAME}
-	docker run  -d -p 8000:8000 --env-file ./env.prod --network=host ${IMAGE_NAME} 1>>./${IMAGE_NAME}.log 2>>./${IMAGE_NAME}.log
+	docker run -p 8000:8000 --env-file ./env.prod --network=host ${IMAGE_NAME} 1>>./${IMAGE_NAME}.log 2>>./${IMAGE_NAME}.log &

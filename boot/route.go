@@ -12,7 +12,7 @@ var commentController = &controller.CommentController{}
 
 func route(r *gin.Engine) {
 	r.POST("login", userController.Login)
-	r.GET("timeline", taskController.Timeline)
+	r.GET("timeline", middleware.Auth(), taskController.Timeline)
 	r.POST("task", middleware.Auth(), taskController.Add)
 	r.POST("comment", middleware.Auth(), commentController.Add)
 }
